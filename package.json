@@ -1,0 +1,16 @@
+{
+  "name": "bus-server",
+  "version": "0.0.1",
+  "description": "nodejs bus server",
+  "author": {
+    "name": "kzhang",
+    "email": "apolis@qq.com"
+  },
+  "dependencies": {
+    "cheerio": ">= 0.19.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/apoliszk/bus_server.git"
+  }
+}
