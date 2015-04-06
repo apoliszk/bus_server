@@ -17,7 +17,7 @@ function parse(originReq, originRes) {
             html += data;
         }).on('end', function () {
             var $ = cheerio.load(html);
-            var tds = $(".main td").toArray();
+            var tds = $(".main td");
             var len = tds.length;
             var arr = [];
             var obj;
