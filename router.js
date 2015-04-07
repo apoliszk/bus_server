@@ -18,9 +18,15 @@ function route(req, res) {
 function getLines(originReq, originRes) {
     var originQueryObj = url.parse(originReq.url, true).query;
     var lineName = originQueryObj.name;
-    originRes.writeHeader(200, {'Content-type': 'application/json'});
-    originRes.write(lineName);
-    originRes.end();
+    var Line = global.models.Line;
+
+        if (err) {
+        } else {
+            originRes.writeHeader(200, {'Content-type': 'application/json'});
+            originRes.write(JSON.stringify(lines));
+        }
+        originRes.end();
+    });
 }
 
 function getRealTimeInfo(originReq, originRes) {
