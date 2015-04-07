@@ -1,5 +1,6 @@
 var cheerio = require('cheerio');
 var config = require('../config').config;
+var model = require('../model');
 var http = require('http');
 var mongoose = require('mongoose');
 
@@ -10,12 +11,8 @@ db.on('error', function () {
     console.log('connect to db failed');
 });
 db.once('open', function () {
-    var lineSchema = mongoose.Schema({
-        lineId: String,
-        line: String,
-        info: String
-    });
-    var Line = mongoose.model('Line', lineSchema);
+    model.initModels(mongoose)
+    var Line = global.models.Line;
     Line.remove({}, function () {
         getLineInfo(0);
     });

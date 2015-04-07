@@ -2,13 +2,34 @@ var cheerio = require('cheerio');
 var http = require('http');
 var url = require('url');
 
-function parse(originReq, originRes) {
-    var originQueryString = url.parse(originReq.url).query;
+function route(req, res) {
+    var pathname = url.parse(req.url).pathname;
 
+    switch (pathname) {
+        case '/line':
+            getLines(req, res);
+            break;
+        case '/realTime':
+            getRealTimeInfo(req, res);
+            break;
+    }
+}
+
+function getLines(originReq, originRes) {
+    var originQueryObj = url.parse(originReq.url, true).query;
+    var lineName = originQueryObj.name;
+    originRes.writeHeader(200, {'Content-type': 'application/json'});
+    originRes.write(lineName);
+    originRes.end();
+}
+
+function getRealTimeInfo(originReq, originRes) {
+    var originQueryObj = url.parse(originReq.url, true).query;
+    var lineId = originQueryObj.id;
     var options = {
         host: 'www.szjt.gov.cn',
         port: 80,
-        path: '/apts/APTSLine.aspx?' + originQueryString
+        path: '/apts/APTSLine.aspx?lineGuid=' + lineId
     };
 
     var html = '';
@@ -42,4 +63,4 @@ function parse(originReq, originRes) {
     }
 }
 
-exports.parse = parse;
+exports.route = route;
