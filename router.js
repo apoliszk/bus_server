@@ -20,6 +20,7 @@ function getLines(originReq, originRes) {
     var lineName = originQueryObj.name;
     var Line = global.models.Line;
 
+    Line.find({line: new RegExp(lineName, 'i')}, function (err, lines) {
         if (err) {
             console.log('exec query error. lineName = ' + lineName);
         } else {
