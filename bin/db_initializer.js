@@ -10,14 +10,15 @@ db.on('error', function () {
     console.log('connect to db failed');
 });
 db.once('open', function () {
-    var resultArr = [];
     var lineSchema = mongoose.Schema({
         lineId: String,
         line: String,
         info: String
     });
     var Line = mongoose.model('Line', lineSchema);
-    getLineInfo(0);
+    Line.remove({}, function () {
+        getLineInfo(0);
+    });
 
     // function define
     function getLineInfo(lineNum) {
@@ -56,30 +57,12 @@ db.once('open', function () {
                         lineObj.line = line;
                         lineObj.info = getText(tds[i + 1]);
                         lineObj.save();
-                        resultArr.push(lineObj);
                     }
                 }
                 if (lineNum < 10) {
                     getLineInfo(lineNum + 1);
                 } else {
-                    resultArr.sort(function (a, b) {
-                        if (isNaN(a.line) && isNaN(b.line)) {
-                            if (a.line > b.line) {
-                                return 1;
-                            } else if (a.line < b.line) {
-                                return -1;
-                            }
-                            return 0;
-                        } else if (!isNaN(a.line) && !isNaN(b.line)) {
-                            return parseInt(a.line) - parseInt(b.line);
-                        } else if (!isNaN(a.line) && isNaN(b.line)) {
-                            return -1;
-                        } else if (isNaN(a.line) && !isNaN(b.line)) {
-                            return 1;
-                        }
-                        return 0;
-                    });
-                    console.log(JSON.stringify(resultArr));
+                    db.close();
                 }
             });
         });
