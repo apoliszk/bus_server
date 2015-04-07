@@ -21,6 +21,7 @@ function getLines(originReq, originRes) {
     var Line = global.models.Line;
 
         if (err) {
+            console.log('exec query error. lineName = ' + lineName);
         } else {
             originRes.writeHeader(200, {'Content-type': 'application/json'});
             originRes.write(JSON.stringify(lines));
