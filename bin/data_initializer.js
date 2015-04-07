@@ -44,20 +44,19 @@ db.once('open', function () {
             res.on('data', function (data) {
                 html += data;
             }).on('end', function () {
+                var line;
+                var lineObj;
                 var $ = cheerio.load(html);
                 var tds = $(".main td");
-                var len = tds.length;
-                var line;
-                var obj;
-                for (var i = 0; i < len; i += 2) {
+                for (var i = 0, len = tds.length; i < len; i += 2) {
                     line = getText(tds[i]);
                     if (!isExist(lineNum, line)) {
-                        obj = new Line();
-                        obj.lineId = getLineId(tds[i]);
-                        obj.line = line;
-                        obj.info = getText(tds[i + 1]);
-                        obj.save();
-                        resultArr.push(obj);
+                        lineObj = new Line();
+                        lineObj.lineId = getLineId(tds[i]);
+                        lineObj.line = line;
+                        lineObj.info = getText(tds[i + 1]);
+                        lineObj.save();
+                        resultArr.push(lineObj);
                     }
                 }
                 if (lineNum < 10) {
@@ -89,9 +88,8 @@ db.once('open', function () {
     }
 
     function isExist(lineNum, line) {
-        var len = line.length;
         var char;
-        for (var i = 0; i < len; i++) {
+        for (var i = 0, len = line.length; i < len; i++) {
             char = line.charAt(i);
             if (!isNaN(char)) {
                 if (parseInt(char) < lineNum) {
