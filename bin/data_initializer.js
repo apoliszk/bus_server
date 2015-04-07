@@ -16,7 +16,7 @@ db.once('open', function () {
         line: String,
         info: String
     });
-    var Line = mongoose.model('Line', lineSchema)
+    var Line = mongoose.model('Line', lineSchema);
     getLineInfo(0);
 
     // function define
