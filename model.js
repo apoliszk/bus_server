@@ -1,4 +1,4 @@
-function initModels(mongoose) {
+function init(mongoose) {
     var lineSchema = mongoose.Schema({
         lineId: String,
         line: String,
@@ -9,4 +9,4 @@ function initModels(mongoose) {
     global.models.Line = Line;
 }
 
-exports.initModels = initModels;
+exports.init = init;

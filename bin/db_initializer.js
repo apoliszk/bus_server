@@ -1,6 +1,7 @@
 var cheerio = require('cheerio');
 var config = require('../config').config;
 var model = require('../model');
+var parser = require('../htmlParser');
 var http = require('http');
 var mongoose = require('mongoose');
 
@@ -11,7 +12,7 @@ db.on('error', function () {
     console.log('connect to db failed');
 });
 db.once('open', function () {
-    model.initModels(mongoose);
+    model.init(mongoose);
     var Line = global.models.Line;
     Line.remove({}, function () {
         getLineInfo(0);
@@ -47,12 +48,12 @@ db.once('open', function () {
                 var $ = cheerio.load(html);
                 var tds = $(".main td");
                 for (var i = 0, len = tds.length; i < len; i += 2) {
-                    line = getText(tds[i]);
+                    line = parser.getNodeText(tds[i]);
                     if (!isExist(lineNum, line)) {
                         lineObj = new Line();
-                        lineObj.lineId = getLineId(tds[i]);
+                        lineObj.lineId = parser.getLineId(tds[i]);
                         lineObj.line = line;
-                        lineObj.info = getText(tds[i + 1]);
+                        lineObj.info = parser.getNodeText(tds[i + 1]);
                         lineObj.save();
                     }
                 }
@@ -78,29 +79,5 @@ db.once('open', function () {
             }
         }
         return false;
-    }
-
-    function getText(n) {
-        if (n.children && n.children.length > 0) {
-            return getText(n.children[0]);
-        }
-        return n.data;
-    }
-
-    var lineIdReg = /[^?]+\?lineguid=([^&]+).+/i;
-
-    function getLineId(n) {
-        if (n.name == 'a') {
-            var href = n.attribs.href;
-            var result = lineIdReg.exec(href);
-            if (result.length == 2) {
-                return result[1];
-            } else {
-                return undefined;
-            }
-        } else if (n.children && n.children.length > 0) {
-            return getLineId(n.children[0]);
-        }
-        return undefined;
     }
 });

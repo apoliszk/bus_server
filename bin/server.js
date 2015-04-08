@@ -10,7 +10,7 @@ db.on('error', function () {
     console.log('connect to db failed');
 });
 db.once('open', function () {
-    model.initModels(mongoose);
+    model.init(mongoose);
     var server = http.createServer(function (req, res) {
         router.route(req, res);
     });
