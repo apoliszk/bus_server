@@ -1,8 +1,9 @@
 function init(mongoose) {
     var lineSchema = mongoose.Schema({
-        lineId: String,
-        line: String,
-        info: String
+        _id: String,
+        name: String,
+        description: String,
+        stations: [String]
     });
     var Line = mongoose.model('Line', lineSchema);
     global.models = {};

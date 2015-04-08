@@ -64,9 +64,9 @@ function getLineInfo(lineNum, callBack) {
             for (var i = 0, len = tds.length; i < len; i += 2) {
                 line = parser.getNodeText(tds[i]);
                 lineObj = new Line();
-                lineObj.lineId = parser.getLineId(tds[i]);
-                lineObj.line = line;
-                lineObj.info = parser.getNodeText(tds[i + 1]);
+                lineObj._id = parser.getLineId(tds[i]);
+                lineObj.name = line;
+                lineObj.description = parser.getNodeText(tds[i + 1]);
                 resultArr.push(lineObj);
             }
             callBack(resultArr);
