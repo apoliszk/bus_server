@@ -61,9 +61,14 @@ function getLineInfo(lineNum, callBack) {
                 var $ = cheerio.load(html);
                 var tds = $(".main td");
 
-                var index = 0;
-                var lineId = parser.getLineId(tds[index]);
-                getLineRealTimeInfo(lineId, getLineStationInfoCompleteHandler);
+                var index = getNextIndex(0);
+                if (index >= 0) {
+                    var lineId = parser.getLineId(tds[index]);
+                    getLineRealTimeInfo(lineId, getLineStationInfoCompleteHandler);
+                } else {
+                    callBack(resultArr);
+                }
+
                 function getLineStationInfoCompleteHandler(arr) {
                     lineObj = new Line();
                     lineObj._id = lineId;
@@ -73,23 +78,48 @@ function getLineInfo(lineNum, callBack) {
                         lineObj.stations.push(arr[i].station);
                     }
                     if (len > 2) {
-                        if (arr[0] != arr[len - 1]) {
-                            lineObj.description = arr[0] + ' -> ' + arr[len - 1];
+                        if (arr[0].station != arr[len - 1].station) {
+                            lineObj.description = arr[0].station + ' -> ' + arr[len - 1].station;
                         } else {
-                            lineObj.description = arr[0] + ' -> ' + arr[1] + '...' + ' -> ' + arr[len - 1];
+                            lineObj.description = arr[0].station + ' -> ' + arr[1].station + '...' + ' -> ' + arr[len - 1].station;
                         }
                     }
                     resultArr.push(lineObj);
 
                     console.log('get ' + lineObj.name);
 
-                    index += 2;
-                    if (index < tds.length) {
+                    index = getNextIndex(index + 2);
+                    if (index >= 0) {
                         lineId = parser.getLineId(tds[index]);
                         getLineRealTimeInfo(lineId, getLineStationInfoCompleteHandler);
                     } else {
                         callBack(resultArr);
                     }
+                }
+
+                function getNextIndex(index) {
+                    var lineName;
+                    while (index < tds.length) {
+                        lineName = parser.getNodeText(tds[index]);
+                        if (!isExist(lineNum, lineName)) {
+                            return index;
+                        }
+                        index += 2;
+                    }
+                    return -1;
+                }
+
+                function isExist(n, lineName) {
+                    var char;
+                    for (var i = 0, len = lineName.length; i < len; i++) {
+                        char = lineName.charAt(i);
+                        if (!isNaN(char)) {
+                            if (parseInt(char) < n) {
+                                return true;
+                            }
+                        }
+                    }
+                    return false;
                 }
             });
         }
