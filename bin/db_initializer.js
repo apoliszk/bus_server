@@ -11,7 +11,7 @@ db.on('error', function () {
     console.log('connect to db failed');
 });
 db.once('open', function () {
-    model.initModels(mongoose)
+    model.initModels(mongoose);
     var Line = global.models.Line;
     Line.remove({}, function () {
         getLineInfo(0);
