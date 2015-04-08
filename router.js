@@ -1,5 +1,5 @@
 var url = require('url');
-var realTime = require('./real_time');
+var proxy = require('./proxy');
 
 function route(req, res) {
     var pathname = url.parse(req.url).pathname;
@@ -33,7 +33,7 @@ function getLines(originReq, originRes) {
 function getRealTimeInfo(originReq, originRes) {
     var originQueryObj = url.parse(originReq.url, true).query;
     var lineId = originQueryObj.id;
-    realTime.get(lineId, function (arr) {
+    proxy.getLineRealTimeInfo(lineId, function (arr) {
         originRes.writeHeader(200, {'Content-type': 'application/json'});
         originRes.write(JSON.stringify(arr));
         originRes.end();
