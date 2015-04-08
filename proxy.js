@@ -20,7 +20,7 @@ function getLineRealTimeInfo(lineId, callBack) {
             var obj;
             for (var i = 0; i < len; i += 4) {
                 obj = {};
-                obj.name = parser.getNodeText(tds[i]);
+                obj.station = parser.getNodeText(tds[i]);
                 obj.bus = parser.getNodeText(tds[i + 2]);
                 obj.time = parser.getNodeText(tds[i + 3]);
                 arr.push(obj);
@@ -52,26 +52,48 @@ function getLineInfo(lineNum, callBack) {
 
     var html = '';
     var req = http.request(options, function (res) {
-        res.setEncoding('utf8');
-        res.on('data', function (data) {
-            html += data;
-        }).on('end', function () {
-            var Line = global.models.Line;
-            var line;
-            var lineObj;
-            var $ = cheerio.load(html);
-            var tds = $(".main td");
-            for (var i = 0, len = tds.length; i < len; i += 2) {
-                line = parser.getNodeText(tds[i]);
-                lineObj = new Line();
-                lineObj._id = parser.getLineId(tds[i]);
-                lineObj.name = line;
-                lineObj.description = parser.getNodeText(tds[i + 1]);
-                resultArr.push(lineObj);
-            }
-            callBack(resultArr);
-        });
-    });
+            res.setEncoding('utf8');
+            res.on('data', function (data) {
+                html += data;
+            }).on('end', function () {
+                var Line = global.models.Line;
+                var lineObj;
+                var $ = cheerio.load(html);
+                var tds = $(".main td");
+
+                var index = 0;
+                var lineId = parser.getLineId(tds[index]);
+                getLineRealTimeInfo(lineId, getLineStationInfoCompleteHandler);
+                function getLineStationInfoCompleteHandler(arr) {
+                    lineObj = new Line();
+                    lineObj._id = lineId;
+                    lineObj.name = parser.getNodeText(tds[index]);
+                    lineObj.stations = [];
+                    for (var i = 0, len = arr.length; i < len; i++) {
+                        lineObj.stations.push(arr[i].station);
+                    }
+                    if (len > 2) {
+                        if (arr[0] != arr[len - 1]) {
+                            lineObj.description = arr[0] + ' -> ' + arr[len - 1];
+                        } else {
+                            lineObj.description = arr[0] + ' -> ' + arr[1] + '...' + ' -> ' + arr[len - 1];
+                        }
+                    }
+                    resultArr.push(lineObj);
+
+                    console.log('get ' + lineObj.name);
+
+                    index += 2;
+                    if (index < tds.length) {
+                        lineId = parser.getLineId(tds[index]);
+                        getLineRealTimeInfo(lineId, getLineStationInfoCompleteHandler);
+                    } else {
+                        callBack(resultArr);
+                    }
+                }
+            });
+        }
+    );
     req.write(postData);
     req.end();
 }
