@@ -30,9 +30,7 @@ function getLineRealTimeInfo(lineId, callBack) {
     });
 }
 
-function getLineInfo(lineNum, callBack) {
-    var resultArr = [];
-
+function getLineInfo(lineNum, optimize, callBackFunc, saveFunc) {
     var postData = '__VIEWSTATE=%2FwEPDwUJNDk3MjU2MjgyD2QWAmYPZBYCAgMPZBYCAgEPZBYCAgYPDxYCHgdWaXNpYmxlaGRkZNSq3M6FLiH9uhezHaCZYWZQT%2F9VbteYCJ3RkqvkKG66'
         + '&__VIEWSTATEGENERATOR=964EC381'
         + '&__EVENTVALIDATION=%2FwEWAwLZi%2B7ABAL88Oh8AqX89aoKVJoV4zpUp4emFejE9%2F7pXtFgzQ3x2PHjaMh9lXvOycg%3D'
@@ -56,7 +54,6 @@ function getLineInfo(lineNum, callBack) {
             res.on('data', function (data) {
                 html += data;
             }).on('end', function () {
-                var Line = global.models.Line;
                 var lineObj;
                 var $ = cheerio.load(html);
                 var tds = $(".main td");
@@ -66,11 +63,11 @@ function getLineInfo(lineNum, callBack) {
                     var lineId = parser.getLineId(tds[index]);
                     getLineRealTimeInfo(lineId, getLineStationInfoCompleteHandler);
                 } else {
-                    callBack(resultArr);
+                    callBackFunc();
                 }
 
                 function getLineStationInfoCompleteHandler(arr) {
-                    lineObj = new Line();
+                    lineObj = {};
                     lineObj._id = lineId;
                     lineObj.name = parser.getNodeText(tds[index]);
                     lineObj.stations = [];
@@ -84,7 +81,7 @@ function getLineInfo(lineNum, callBack) {
                             lineObj.description = arr[0].station + ' -> ' + arr[1].station + '...' + ' -> ' + arr[len - 1].station;
                         }
                     }
-                    resultArr.push(lineObj);
+                    saveFunc(lineObj);
 
                     console.log('get ' + lineObj.name);
 
@@ -93,11 +90,18 @@ function getLineInfo(lineNum, callBack) {
                         lineId = parser.getLineId(tds[index]);
                         getLineRealTimeInfo(lineId, getLineStationInfoCompleteHandler);
                     } else {
-                        callBack(resultArr);
+                        callBackFunc();
                     }
                 }
 
                 function getNextIndex(index) {
+                    if (!optimize) {
+                        if (index < tds.length) {
+                            return index;
+                        } else {
+                            return -1;
+                        }
+                    }
                     var lineName;
                     while (index < tds.length) {
                         lineName = parser.getNodeText(tds[index]);

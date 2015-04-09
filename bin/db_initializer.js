@@ -9,24 +9,34 @@ db.on('error', function () {
     console.log('connect to db failed');
 });
 db.once('open', function () {
-    var startDate = new Date();
-    var num = 0;
     model.init(mongoose);
-    global.models.Line.remove({}, function () {
-        proxy.getLineInfo(num, callBackFunc);
-    });
-    function callBackFunc(arr) {
-        var lineObj;
-        for (var i = 0, len = arr.length; i < len; i++) {
-            lineObj = arr[i];
-            lineObj.save();
-        }
+
+    var num = 0;
+    var optimize = true;
+    proxy.getLineInfo(num, optimize, getLineInfoCompleteHandler, saveToDb);
+
+    function getLineInfoCompleteHandler() {
         num++;
         if (num < 10) {
-            proxy.getLineInfo(num, callBackFunc)
+            proxy.getLineInfo(num, optimize, getLineInfoCompleteHandler, saveToDb)
         } else {
-            console.log('initialize db complete. time: ' + (new Date().getTime() - startDate.getTime()));
-            db.close();
+            setTimeout(function () {
+                db.close();
+                console.log('db initialize over');
+            }, 5000);
+        }
+    }
+
+    function saveToDb(obj) {
+        if (obj.stations && obj.stations.length > 0) {
+            global.models.Line.findOne({_id: obj._id}, function (err, doc) {
+                if (doc) {
+                    doc.refreshValues(obj);
+                    doc.save();
+                } else {
+                    global.models.Line.create(obj);
+                }
+            });
         }
     }
 });
