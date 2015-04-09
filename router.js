@@ -8,6 +8,9 @@ function route(req, res) {
         case '/line':
             getLines(req, res);
             break;
+        case '/station':
+            getLinesAtStation(req, res);
+            break;
         case '/realTime':
             getRealTimeInfo(req, res);
             break;
@@ -17,11 +20,25 @@ function route(req, res) {
 function getLines(originReq, originRes) {
     var originQueryObj = url.parse(originReq.url, true).query;
     var lineName = originQueryObj.name;
-    var Line = global.models.Line;
 
-    Line.find({name: new RegExp(lineName, 'i')}, function (err, lines) {
+    global.models.Line.find({name: new RegExp(lineName, 'i')}, function (err, lines) {
         if (err) {
             console.log('exec query error. lineName = ' + lineName);
+        } else {
+            originRes.writeHeader(200, {'Content-type': 'application/json'});
+            originRes.write(JSON.stringify(lines));
+        }
+        originRes.end();
+    });
+}
+
+function getLinesAtStation(originReq, originRes) {
+    var originQueryObj = url.parse(originReq.url, true).query;
+    var stationName = originQueryObj.name;
+
+    global.models.Line.find({stations: new RegExp(stationName, 'i')}, function (err, lines) {
+        if (err) {
+            console.log('exec query error. stationName = ' + stationName);
         } else {
             originRes.writeHeader(200, {'Content-type': 'application/json'});
             originRes.write(JSON.stringify(lines));
