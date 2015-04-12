@@ -8,6 +8,7 @@ mongoose.connect(config.db);
 var db = mongoose.connection;
 db.on('error', function () {
     console.log('connect to db failed');
+    db.close();
 });
 db.once('open', function () {
     model.init(mongoose);
